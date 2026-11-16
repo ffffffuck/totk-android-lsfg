@@ -38,6 +38,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Select .NET 10 SDK
+        run: |
+          printf '%s\n' '{"sdk":{"version":"10.0.100","rollForward":"latestFeature"}}' > global.json
+          dotnet --version
+
       - name: Install Android SDK tools
         uses: android-actions/setup-android@v4
         with:
@@ -75,7 +80,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: totk-r27-build-logs
+          name: totk-r28-build-logs
           path: ${{ runner.temp }}/totk-build/logs/
           if-no-files-found: warn
           retention-days: 7
