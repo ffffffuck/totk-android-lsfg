@@ -1128,7 +1128,7 @@ static void log_start(void) {
    refused, since the process outlives a finished activity and the launcher would otherwise see a game running. */
 static int g_game_lock = -1;
 static int start_refused(void) { if (g_game_lock >= 0) { close(g_game_lock); g_game_lock = -1; } return -1; }
-/* What the launcher menu may write into <private>/settings.env: the option mapping and the frame-generation timing
+/* What the launcher menu may write into <private>/settings.env: the option mapping, its selected frame-generation engine and timing
    block of the settings contract, and the game data folder when it is not on the primary storage (TOTK_DATA_DIR, which
    start_game reads before anything else), plus TOTK_AUTOLOAD for a session that writes settings.env and starts the game
    directly (the launcher rewrites the file without it), nothing else. Any other key is a stale or foreign writer and is
@@ -1139,7 +1139,7 @@ static const char *const settings_keys[] = {
     "TOTK_OVERLAY", "TOTK_OVERLAY_POS", "TOTK_COMPANION", "TOTK_FACE_BUTTONS", "TOTK_AUDIO_PREFILL_MS", "TOTK_LOCALE",
     "TOTK_LANG", "TOTK_RUMBLE", "TOTK_RUMBLE_GAIN", "TOTK_GYRO", "TOTK_AUTOLOAD",
     /* frame generation timing block */
-    "TOTK_REALTIME", "TOTK_FRAME_LAG", "TOTK_FPS_AUTO", "DM_PRESENT_HZ", "DM_PRESENT_INTERVAL", "TOTK_PRESENT_SLOTS",
+    "TOTK_FRAMEGEN_ENGINE", "TOTK_REALTIME", "TOTK_FRAME_LAG", "TOTK_FPS_AUTO", "DM_PRESENT_HZ", "DM_PRESENT_INTERVAL", "TOTK_PRESENT_SLOTS",
     "TOTK_VK_PRESENT", "TOTK_ACQUIRE_CLOCK", "TOTK_PACE", "TOTK_ASYNC_REPLAY",
     "TOTK_DATA_DIR",
 };
