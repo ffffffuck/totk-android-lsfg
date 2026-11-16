@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     env:
-      ANDROID_HOME: ${{ runner.temp }}/android-sdk
-      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
       DOTNET_NOLOGO: '1'
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
     steps:
