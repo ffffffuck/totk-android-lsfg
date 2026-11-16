@@ -83,7 +83,7 @@ public final class SetupActivity extends Activity implements SetupService.Listen
     static final String EXTRA_UPDATE_AUTH = "com.aure.totk.setup.UPDATE_AUTH";
     private static final String[] ALL_ROLES = {"romfs", "exefs", "base", "update", "keys"};
     private static final int REQ_PICK = 100, REQ_DRIVER = 900, REQ_NOTIFY = 901, REQ_EXPORT = 902, REQ_IMPORT_ZIP = 903, REQ_IMPORT_TREE = 904, REQ_MIRROR = 905,
-            REQ_DATA_FOLDER = 906, REQ_ACCESS = 907;
+            REQ_DATA_FOLDER = 906, REQ_ACCESS = 907, REQ_LSFG_DLL = 908;
     private static final String[] TABS = {Settings.PERFORMANCE, Settings.PICTURE, Settings.SCREEN};
 
     private enum Screen { WELCOME, SETUP_STORAGE, ROUTE, FILES, UPDATES, UPDATE_DOWNLOAD, INSTALL, ERROR, INTERRUPTED, HOME, GRAPHICS, CONTROLS, DATA, STORAGE, ABOUT, LICENSES,
@@ -1431,6 +1431,15 @@ public final class SetupActivity extends Activity implements SetupService.Listen
                 case "frame_gen":
                     fact(Strings.ADDED_LATENCY, Strings.addedLatency(key, value));
                     fact(Strings.WORKS_WITH, "30 fps only");
+                    File dll = lsfgDll();
+                    TextView lsfg = Theme.text(this, dll.isFile() ? "Lossless.dll installed · choose another" : "Select Lossless.dll for LSFG", true, 19, Theme.SEL);
+                    lsfg.setFocusable(true);
+                    lsfg.setFocusableInTouchMode(true);
+                    lsfg.setClickable(true);
+                    lsfg.setOnClickListener(v -> pickLsfgDll());
+                    fact("LSFG", lsfg);
+                    if (!dll.isFile()) constraint = "Without Lossless.dll, frame generation uses the built-in camera interpolator.";
+                    else constraint = "Experimental: LSFG is selected when frame generation is on.";
                     break;
                 case "latency":
                     fact(Strings.ADDED_LATENCY, settings.latencyLocked() ? Strings.LOCKED_FRAMEGEN : Strings.addedLatency(key, value));
@@ -1635,6 +1644,54 @@ public final class SetupActivity extends Activity implements SetupService.Listen
             }
             String message = outcome;
             main.post(() -> { note = message == null ? "" : message; if (screen == Screen.DATA) render(); });
+        });
+    }
+
+    private File lsfgDll() { return new File(new File(getFilesDir(), "lsfg"), "Lossless.dll"); }
+
+    private void pickLsfgDll() {
+        if (!needGameClosed("Changing frame generation", this::pickLsfgDll)) return;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        try { startActivityForResult(intent, REQ_LSFG_DLL); }
+        catch (ActivityNotFoundException missing) { showNote(Strings.PICKER_MISSING); }
+    }
+
+    /** Keep the user's proprietary DLL in app-private storage; never package or copy it into the source tree. */
+    private void installLsfgDll(Uri uri) {
+        if (!needGameClosed("Changing frame generation", () -> installLsfgDll(uri))) return;
+        worker.execute(() -> {
+            String outcome = null;
+            File directory = new File(getFilesDir(), "lsfg");
+            File temporary = new File(directory, "Lossless.dll.new");
+            try {
+                if (!directory.isDirectory() && !directory.mkdirs()) throw new IOException("could not create private LSFG folder");
+                long total = 0;
+                byte[] buffer = new byte[64 * 1024];
+                try (InputStream in = getContentResolver().openInputStream(uri);
+                     FileOutputStream out = new FileOutputStream(temporary, false)) {
+                    if (in == null) throw new IOException("selected file cannot be read");
+                    int n;
+                    while ((n = in.read(buffer)) != -1) {
+                        total += n;
+                        if (total > (32L << 20)) throw new IOException("Lossless.dll is larger than 32 MiB");
+                        out.write(buffer, 0, n);
+                    }
+                    out.getFD().sync();
+                }
+                if (total < 1024 * 1024) throw new IOException("selected file is too small to be Lossless.dll");
+                android.system.Os.rename(temporary.getAbsolutePath(), lsfgDll().getAbsolutePath());
+            } catch (IOException | android.system.ErrnoException | SecurityException failed) {
+                temporary.delete();
+                outcome = "Lossless.dll was not installed: " + (failed.getMessage() == null ? failed.getClass().getSimpleName() : failed.getMessage());
+            }
+            String message = outcome == null ? "Lossless.dll installed. LSFG will be selected when frame generation is on." : outcome;
+            main.post(() -> {
+                note = message;
+                if (settings == null) settings = SettingsStore.load(this);
+                SettingsStore.writeEnv(this, settings);
+                if (screen == Screen.GRAPHICS) render();
+            });
         });
     }
 
@@ -2736,6 +2793,7 @@ public final class SetupActivity extends Activity implements SetupService.Listen
         if (request == UpdateInstaller.REQUEST_SOURCES) { if (updater != null) updater.permissionReturned(); return; }
         if (code != RESULT_OK || data == null) return;
         if (request == REQ_DRIVER) { if (data.getData() != null) installDriver(data.getData()); return; }
+        if (request == REQ_LSFG_DLL) { if (data.getData() != null) installLsfgDll(data.getData()); return; }
         if (request == REQ_EXPORT) { if (data.getData() != null) writeExport(data.getData()); return; }
         if (request == REQ_IMPORT_ZIP || request == REQ_IMPORT_TREE) { if (data.getData() != null) stageImport(data.getData(), request == REQ_IMPORT_TREE); return; }
         if (request == REQ_MIRROR) { if (data.getData() != null) useMirror(data.getData()); return; }

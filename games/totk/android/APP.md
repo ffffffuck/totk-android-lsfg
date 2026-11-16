@@ -1077,22 +1077,14 @@ PE parser and DXBC translator, not a Vulkan WSI layer.
 
 Supply `Lossless.dll` from **your own purchased copy of Lossless Scaling**.
 We do not distribute the DLL or its translated shaders; you are responsible
-for complying with its license terms. The tested resource interface is Lossless
-Scaling3.2.1.0's LSFG3.1 DXBC resources255–279 (normal) or255–256/280–302
-(performance). Missing selected resources are refused; no model is silently substituted.
-With the app stopped, place it at the app-private path
-`/data/user/0/com.aure.totk/files/lsfg/Lossless.dll`. For a debuggable
-local APK, these are operator-run steps (replace the host path):
-
-```
-adb shell run-as com.aure.totk mkdir -p files/lsfg
-adb shell -T "run-as com.aure.totk sh -c 'cat > files/lsfg/Lossless.dll'" < /host/path/to/your/Lossless.dll
-```
-
-Then start the app normally. A non-debuggable APK requires an authorized way
-to provision its private files; this prototype adds no file-picker/import UI.
-The source DLL is read only. Translation is in memory, with **no derived
-disk cache** and no DLL/shader asset in the APK or repository.
+for complying with its license terms. In Graphics → Performance → Frame
+generation, select the DLL with the file picker. The app copies it into its
+private `files/lsfg/Lossless.dll` directory and selects LSFG whenever frame
+generation is enabled. The source DLL is read only. Translation is in memory,
+with **no derived disk cache** and no DLL/shader asset in the APK or repository.
+The tested resource interface is Lossless Scaling 3.2.1.0's LSFG 3.1 DXBC
+resources 255–279 (normal) or 255–256/280–302 (performance). Missing selected
+resources are refused and the built-in camera interpolator remains the fallback.
 
 LSFG borrows the game's actual VkDevice and graphics/compute queue. Its compute
 dispatches record into the existing renderer primary: the two immutable pre-UI

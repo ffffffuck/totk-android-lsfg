@@ -321,7 +321,7 @@ def verify_signatures(apk, logs, sdk=None):
 
 
 def package(*, out, dex, libs, translator, turnip, assets, key, key_pass_env=None, make_key=False, release, version_code,
-            version_name, timestamp=None, logs, android_sdk=None):
+            version_name, timestamp=None, logs, android_sdk=None, package_id='com.aure.totk'):
     """Sign the APK with build_apk.py, verify each signature scheme and audit it; a failure removes the APK."""
     libs = list(libs) + ([turnip] if turnip else [])
     if turnip:   # packed under the name the runtime looks for beside libtotk.so
@@ -338,7 +338,7 @@ def package(*, out, dex, libs, translator, turnip, assets, key, key_pass_env=Non
         raise BuildError(f'{icons} is missing or older than {art}: rerun python3 games/totk/android/apk/render_launcher.py (needs Pillow)')
     cmd = [sys.executable, HERE / 'apk/build_apk.py', '--dex', dex, *sum((['--lib', str(p)] for p in libs), []),
            '--ondevice-xlate', translator, '--assets', assets, '--launcher-mipmaps', icons, '--out', out, '--key', key,
-           '--version-code', str(version_code), '--version-name', version_name, '--min-sdk', str(API), '--target-sdk', str(API)]
+           '--package', package_id, '--version-code', str(version_code), '--version-name', version_name, '--min-sdk', str(API), '--target-sdk', str(API)]
     cmd += (['--key-pass-env', key_pass_env] if key_pass_env else []) + (['--make-key'] if make_key else [])
     cmd += (['--release'] if release else []) + (['--timestamp', str(timestamp)] if timestamp is not None else [])
     run(cmd, logs / 'build_apk.log')
@@ -363,7 +363,7 @@ def audit_entries(apk):
 
 
 def app(*, work, ndk, logs, out, key, key_pass_env=None, make_key=False, release=True, turnip=None, translator=None,
-        android_sdk=None, version_code=None, version_name=None, jobs=os.cpu_count() or 4):
+        android_sdk=None, version_code=None, version_name=None, package_id='com.aure.totk', jobs=os.cpu_count() or 4):
     """The whole app from the repository: native libraries, translator, dex, assets, signed and audited APK. Shared by the
     public release (release=True, the caller's key and the pinned Turnip) and build_android.py --apk (a debuggable build
     signed with the work folder's developer key)."""
@@ -380,7 +380,7 @@ def app(*, work, ndk, logs, out, key, key_pass_env=None, make_key=False, release
     return package(out=out, dex=dex, libs=libs, translator=xlate, turnip=check_turnip(turnip) if turnip else None, assets=assets,
                    key=key, key_pass_env=key_pass_env, make_key=make_key, release=release,
                    version_code=version_code or (int(time.time()) // 60 if make_key else semver_code(name)),
-                   version_name=name, timestamp=stamp, logs=logs, android_sdk=android_sdk)
+                   version_name=name, timestamp=stamp, logs=logs, android_sdk=android_sdk, package_id=package_id)
 
 
 def source_commit():

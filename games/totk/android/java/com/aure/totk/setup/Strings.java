@@ -171,7 +171,8 @@ final class Strings {
             case "frame_rate": return "How often the game itself updates. 30 fps is what the game was made for; 60 fps doubles the work "
                     + "for the processor and the GPU, and busy areas may drop below it.";
             case "frame_gen": return "Draws an in-between picture from two real frames, so the screen updates 60 times a second while "
-                    + "the game itself runs at 30. Motion looks smoother; input feels about one frame later.";
+                    + "the game itself runs at 30. With your Lossless.dll installed this uses Lossless Scaling's LSFG 3; otherwise it uses "
+                    + "the built-in camera interpolator. Motion looks smoother; input feels about one frame later.";
             case "render_res": return "The size the game draws its 3D scene at before it is enlarged to fill the screen. Smaller is faster "
                     + "and softer. Game default lets the game choose, as on the console.";
             case "latency": return "How many finished pictures may wait for the screen. Responsive shows each one as soon as possible; "

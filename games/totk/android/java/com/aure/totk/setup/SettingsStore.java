@@ -7,6 +7,7 @@ import android.os.LocaleList;
 import android.util.Log;
 import com.aure.totk.companion.DisplayClass;
 import com.aure.totk.companion.PresentationController;
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -47,7 +48,8 @@ final class SettingsStore {
     /** Rewrite settings.env (atomic, Settings.writeAtomic). Returns null on success, else why it failed. */
     static String writeEnv(Context context, Settings settings) {
         try {
-            Settings.writeAtomic(context.getFilesDir(), ENV, settings.env(locale(), StorageLocation.envValue(context)));
+            File dll = new File(new File(context.getFilesDir(), "lsfg"), "Lossless.dll");
+            Settings.writeAtomic(context.getFilesDir(), ENV, settings.env(locale(), StorageLocation.envValue(context), dll.isFile()));
             return null;
         } catch (IOException | SecurityException failed) {
             Log.w("TotkMenu", "settings.env not written", failed);

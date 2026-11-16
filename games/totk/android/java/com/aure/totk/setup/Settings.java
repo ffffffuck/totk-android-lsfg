@@ -194,12 +194,16 @@ final class Settings {
      * game folder when it is not the primary one (SD card), else null; written first, because the runtime reads it
      * before it chooses its data folder and log. */
     String env(String locale) { return env(locale, null); }
-    String env(String locale, String dataDir) {
+    String env(String locale, String dataDir) { return env(locale, dataDir, false); }
+    String env(String locale, String dataDir, boolean lsfgAvailable) {
         StringBuilder out = new StringBuilder(HEADER);
         if (dataDir != null && dataDir.startsWith("/") && dataDir.indexOf('\n') < 0 && dataDir.indexOf('\r') < 0 && dataDir.indexOf('\0') < 0)
             line(out, "TOTK_DATA_DIR=" + dataDir);
         boolean framegen = "on".equals(get("frame_gen"));
-        if (framegen) for (String line : FRAMEGEN_BLOCK) line(out, line);
+        if (framegen) {
+            for (String line : FRAMEGEN_BLOCK) line(out, line);
+            if (lsfgAvailable) line(out, "TOTK_FRAMEGEN_ENGINE=lsfg");
+        }
         else {
             boolean sixty = "60".equals(get("frame_rate"));
             line(out, "TOTK_FPS60=" + (sixty ? "1" : "0"));
