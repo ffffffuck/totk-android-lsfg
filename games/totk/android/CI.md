@@ -1,6 +1,6 @@
 # GitHub Actions test APK
 
-The `Android test APK` workflow builds a separate, debuggable package (`com.aure.totk.codextest`) from source on an Ubuntu runner using NDK r27.3. It does not package game data, a Turnip driver, or `Lossless.dll`. The LSFG picker remains in the app; select the DLL on the Odin 3 after installing the APK.
+The `Android test APK` workflow builds a separate, debuggable package (`com.aure.totk.codextest`) from source on an Ubuntu runner using the repository-supported NDK r28.2. It does not package game data, a Turnip driver, or `Lossless.dll`. The LSFG picker remains in the app; select the DLL on the Odin 3 after installing the APK.
 
 ## One-time signing key setup
 
@@ -16,4 +16,4 @@ Paste `totk-signing-key.pem` into the secret, then delete the temporary key file
 
 ## Run and download
 
-Push a commit to your fork or use Actions → Android test APK → Run workflow. When the run completes, open it and download the `totk-r27-lsfg-odin3` artifact. Install the APK on the Odin 3; it installs beside the original app. Because Android keeps each app's files separate, the test package needs its own game setup. In Graphics → Performance → Frame generation, select the DLL you own to enable LSFG.
+Push a commit to your fork or use Actions → Android test APK → Run workflow. When the run completes, open it and download the `totk-r28-lsfg-odin3` artifact. Install the APK on the Odin 3; it installs beside the original app. Because Android keeps each app's files separate, the test package needs its own game setup. In Graphics → Performance → Frame generation, select the DLL you own to enable LSFG.

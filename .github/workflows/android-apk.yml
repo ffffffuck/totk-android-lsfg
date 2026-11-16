@@ -41,7 +41,7 @@ jobs:
       - name: Install Android SDK tools
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0 ndk;27.3.13750724'
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0 ndk;28.2.13676358'
 
       - name: Install native build tools and Android packages
         run: |
@@ -65,11 +65,11 @@ jobs:
       - name: Build Odin 3 test APK
         run: |
           python games/totk/android/ci_build_apk.py \
-            --ndk "$ANDROID_SDK_ROOT/ndk/27.3.13750724" \
+            --ndk "$ANDROID_SDK_ROOT/ndk/28.2.13676358" \
             --sdk "$ANDROID_SDK_ROOT" \
             --key "$RUNNER_TEMP/totk-ci-key.pem" \
             --work "$RUNNER_TEMP/totk-build" \
-            --out "$RUNNER_TEMP/totk-r27-lsfg-odin3.apk"
+            --out "$RUNNER_TEMP/totk-r28-lsfg-odin3.apk"
 
       - name: Upload build logs after failure
         if: failure()
@@ -83,7 +83,7 @@ jobs:
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: totk-r27-lsfg-odin3
-          path: ${{ runner.temp }}/totk-r27-lsfg-odin3.apk
+          name: totk-r28-lsfg-odin3
+          path: ${{ runner.temp }}/totk-r28-lsfg-odin3.apk
           if-no-files-found: error
           retention-days: 14
