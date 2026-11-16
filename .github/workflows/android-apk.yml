@@ -71,6 +71,15 @@ jobs:
             --work "$RUNNER_TEMP/totk-build" \
             --out "$RUNNER_TEMP/totk-r27-lsfg-odin3.apk"
 
+      - name: Upload build logs after failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: totk-r27-build-logs
+          path: ${{ runner.temp }}/totk-build/logs/
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
